@@ -16,7 +16,7 @@ export default function Index() {
     loading: moviesLoading, 
     error: moviesError 
   } = useFetch(
-    () => fetchMovies({query: ''}), 
+    () => fetchMovies({query: 'iron man'}), 
     true
   );
 
