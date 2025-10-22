@@ -39,3 +39,22 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
         throw err;
     }
 }
+
+export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> => {
+    try {
+        const result = await databases.listRows(
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_TABLE_NAME!, 
+            [
+                Query.limit(5),
+                Query.orderDesc('count')
+            ]
+        );
+
+        console.log(result);
+        return result.rows as unknown as TrendingMovie[];
+    }catch(err){
+        console.error(err);
+        return undefined;
+    }
+}

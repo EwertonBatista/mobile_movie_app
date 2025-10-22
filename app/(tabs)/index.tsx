@@ -2,6 +2,7 @@ import MovieCard from "@/components/MovieCard";
 import SearchBar from "@/components/SearchBar";
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
+import { getTrendingMovies } from "@/lib/appwrite";
 import { fetchMovies } from "@/services/api";
 import useFetch from "@/services/useFetch";
 import { useRouter } from "expo-router";
@@ -10,6 +11,12 @@ import { ActivityIndicator, FlatList, Image, ScrollView, Text, View } from "reac
 export default function Index() {
 
   const router = useRouter();
+
+  const {
+    data: trendingMovies,
+    loading: trendingMoviesLoading,
+    error: trendingMoviesError
+  } = useFetch(getTrendingMovies, true);
 
   const { 
     data: movies, 
@@ -25,16 +32,32 @@ export default function Index() {
       <Image source={images.bg} className="absolute w-full z-0"/>
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false} contentContainerStyle={{minHeight: '100%', paddingBottom: 10}}>
         <Image source={icons.logo} className="w-12 h-10 mt-20 mb-5 mx-auto"/>
-        {moviesLoading ? (
+        {moviesLoading || trendingMoviesLoading ? (
           <ActivityIndicator size="large" color="#0000ff" className="mt-10 self-center"/>
-        ): moviesError ? (
-          <Text className="mt-10 text-white text-center">{moviesError.message}</Text>
+        ): moviesError || trendingMoviesError ? (
+          <Text className="mt-10 text-white text-center">{moviesError?.message || trendingMoviesError?.message}</Text>
         ) : (
         <View className="flex-1 mt-5">
           <SearchBar 
               onPress={() => router.push('/search')}
               placeholder="Search for a movie"
             />
+
+            {trendingMovies && (              
+              <View className="mt-10">
+                <Text className="text-lg text-white font-bold mt-5 mb-3">Trending Movies</Text>
+
+                <FlatList 
+                  data={trendingMovies} 
+                  horizontal={true} 
+                  showsHorizontalScrollIndicator={false} 
+                  keyExtractor={(item) => item.movie_id.toString()} 
+                  ItemSeparatorComponent={() => <View className="w-3"/>}
+                  renderItem={({item, index}) => (
+                    <Text className="text-white mr-3">{item.title}</Text>
+                  )}/>
+              </View>
+            )}
 
             <>
               <Text className="text-lg text-white font-bold mt-5 mb-3">Latest Movies</Text>
