@@ -2,10 +2,11 @@ import MovieCard from '@/components/MovieCard'
 import SearchBar from '@/components/SearchBar'
 import { icons } from '@/constants/icons'
 import { images } from '@/constants/images'
+import { updateSearchCount } from '@/lib/appwrite'
 import { fetchMovies } from '@/services/api'
 import useFetch from '@/services/useFetch'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, FlatList, Image, Text, View } from 'react-native'
+import { ActivityIndicator, Button, FlatList, Image, Text, View } from 'react-native'
 
 const Search = () => {
 
@@ -25,7 +26,13 @@ const Search = () => {
   useEffect(() => {
     const timeoutId = setTimeout(async () => {
       if(searchQuery.trim()) {
-          await loadMovies();
+        await loadMovies();
+        if(movies?.length > 0 && movies?.[0]){
+          console.log("Entrando aq");
+          await updateSearchCount(searchQuery, movies[0]);        
+        }else{
+          console.log("Não entrou aq");
+        }
       }else{
         reset();
       }
@@ -37,7 +44,6 @@ const Search = () => {
   return (
     <View className="flex-1 bg-primary">
       <Image source={images.bg} className="flex-1 absolute w-full z-0" resizeMode='cover'/>
-      <Text>search</Text>
 
       <FlatList 
         data={movies} 
@@ -76,6 +82,12 @@ const Search = () => {
                   <Text className='text-accent'>{searchQuery}</Text>
                 </Text>
             )}
+
+            {/* Debug buttons */}
+            <View className='mb-5'>
+              <Button title='logar dados' onPress={() => console.log(movies)}/>
+            </View>
+            <Button title="fazer fetch" onPress={() => loadMovies()}/>
           </>
         }
         ListEmptyComponent={
