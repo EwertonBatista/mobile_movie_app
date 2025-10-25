@@ -28,11 +28,10 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
                 searchTerm: query,
                 movie_id: movie.id,
                 count: 1,
-                poster_url: `http://image.tdb.org/t/p/w500${movie.poster_path}`,
+                poster_url: `http://image.tmdb.org/t/p/w500${movie.poster_path}`,
                 title: movie.title
             });
 
-            console.log("Criado com sucesso");
         }
     }catch(err){
         console.error(err);
@@ -51,7 +50,6 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> 
             ]
         );
 
-        console.log(result);
         return result.rows as unknown as TrendingMovie[];
     }catch(err){
         console.error(err);

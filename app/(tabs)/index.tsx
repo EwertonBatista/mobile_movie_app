@@ -1,5 +1,6 @@
 import MovieCard from "@/components/MovieCard";
 import SearchBar from "@/components/SearchBar";
+import TrendingCard from "@/components/TrendingCard";
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
 import { getTrendingMovies } from "@/lib/appwrite";
@@ -23,7 +24,7 @@ export default function Index() {
     loading: moviesLoading, 
     error: moviesError 
   } = useFetch(
-    () => fetchMovies({query: 'iron man'}), 
+    () => fetchMovies({query: ''}), 
     true
   );
 
@@ -46,16 +47,17 @@ export default function Index() {
             {trendingMovies && (              
               <View className="mt-10">
                 <Text className="text-lg text-white font-bold mt-5 mb-3">Trending Movies</Text>
-
                 <FlatList 
                   data={trendingMovies} 
                   horizontal={true} 
                   showsHorizontalScrollIndicator={false} 
-                  keyExtractor={(item) => item.movie_id.toString()} 
                   ItemSeparatorComponent={() => <View className="w-3"/>}
                   renderItem={({item, index}) => (
-                    <Text className="text-white mr-3">{item.title}</Text>
-                  )}/>
+                    <TrendingCard movie={item} index={index}/>
+                  )}
+                  keyExtractor={(item, index) => `${item.movie_id.toString()}_${index}`}
+                  />
+                  
               </View>
             )}
 

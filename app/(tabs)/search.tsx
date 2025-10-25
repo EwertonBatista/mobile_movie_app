@@ -6,7 +6,7 @@ import { updateSearchCount } from '@/lib/appwrite'
 import { fetchMovies } from '@/services/api'
 import useFetch from '@/services/useFetch'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Button, FlatList, Image, Text, View } from 'react-native'
+import { ActivityIndicator, FlatList, Image, Text, View } from 'react-native'
 
 const Search = () => {
 
@@ -27,9 +27,6 @@ const Search = () => {
     const timeoutId = setTimeout(async () => {
       if(searchQuery.trim()) {
         await loadMovies();
-        if(movies?.length > 0 && movies?.[0]){
-          await updateSearchCount(searchQuery, movies[0]);        
-        }
       }else{
         reset();
       }
@@ -85,12 +82,6 @@ const Search = () => {
                   <Text className='text-accent'>{searchQuery}</Text>
                 </Text>
             )}
-
-            {/* Debug buttons */}
-            <View className='mb-5'>
-              <Button title='logar dados' onPress={() => console.log(movies)}/>
-            </View>
-            <Button title="fazer fetch" onPress={() => loadMovies()}/>
           </>
         }
         ListEmptyComponent={

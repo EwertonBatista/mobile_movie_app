@@ -24,7 +24,6 @@ export const fetchMovies = async ({ query }: { query: string }) => {
 
   const data = await response.json();
 
-  // 🔒 Garante retorno seguro
   return Array.isArray(data.results) ? data.results : [];
 };
 
