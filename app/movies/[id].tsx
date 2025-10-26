@@ -55,7 +55,7 @@ const MovieDetails = () => {
 
         </View>
       </ScrollView>
-      <TouchableOpacity className='absolute left-0 right-0 bottom-5 bg-accent rounded-lg py-2 mx-5 flex flex-row items-center justify-center z-50' onPress={router.back}>
+      <TouchableOpacity className='absolute left-0 right-0 bottom-10 bg-accent rounded-lg py-2 mx-5 flex flex-row items-center justify-center z-50' onPress={router.back}>
         <Image source={icons.arrow} className='size-6 rotate-180' tintColor="#FFD700"/>
         <Text className='text-white text-sm font-bold'>Go back</Text>
       </TouchableOpacity>
