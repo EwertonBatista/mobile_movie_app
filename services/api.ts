@@ -33,7 +33,6 @@ export const fetchMovieDetails = async (movieId: string): Promise<MovieDetails> 
       method: 'GET',
       headers: TMDB_CONFIG.headers,
     });
-  
     if (!response.ok) {
       throw new Error(`Failed to fetch data: ${response.statusText}`);
     }

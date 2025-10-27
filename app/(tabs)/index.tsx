@@ -1,3 +1,4 @@
+import { useAuth } from "@/components/context/AuthContext";
 import MovieCard from "@/components/MovieCard";
 import SearchBar from "@/components/SearchBar";
 import TrendingCard from "@/components/TrendingCard";
@@ -8,10 +9,11 @@ import { fetchMovies } from "@/services/api";
 import useFetch from "@/services/useFetch";
 import { useRouter } from "expo-router";
 import { ActivityIndicator, FlatList, Image, ScrollView, Text, View } from "react-native";
-
 export default function Index() {
 
   const router = useRouter();
+  const { user, login, logout } = useAuth();
+
 
   const {
     data: trendingMovies,
@@ -31,6 +33,9 @@ export default function Index() {
   return (
     <View className="flex-1 bg-primary">
       <Image source={images.bg} className="absolute w-full z-0"/>
+      {/* <View className="w-32 bg-blue-300">
+        <Button title="log" onPress={() => console.log("A")}/>
+      </View> */}
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false} contentContainerStyle={{minHeight: '100%', paddingBottom: 10}}>
         <Image source={icons.logo} className="w-12 h-10 mt-20 mb-5 mx-auto"/>
         {moviesLoading || trendingMoviesLoading ? (

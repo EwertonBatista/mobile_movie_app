@@ -30,6 +30,7 @@ const _Layout = () => {
         tabBarItemStyle: {width: '70%', height: '10%', justifyContent: 'center', alignItems: 'center'},
         tabBarStyle: {backgroundColor: '#0f0D23', borderRadius: 10, marginHorizontal: 20, marginBottom: 50, height: 52, position: 'absolute', overflow: 'hidden', borderWidth: 1, borderColor: '#0f0D23'},
       }}>
+      <Tabs.Screen name="login" options={{ headerShown: false, title: 'Login', tabBarIcon: ({focused}) => (<TabIcon focused={focused} icon={icons.person} title="Login"/>) }} />
       <Tabs.Screen name="index" options={{ headerShown: false, title: 'Home', tabBarIcon: ({focused}) => (<TabIcon focused={focused} icon={icons.home} title="Home" />) }} />
       <Tabs.Screen name="search" options={{ headerShown: false, title: 'Search', tabBarIcon: ({focused}) => (<TabIcon focused={focused} icon={icons.search} title="Search"/>) }} />
       <Tabs.Screen name="saved" options={{ headerShown: false, title: 'Saved', tabBarIcon: ({focused}) => (<TabIcon focused={focused} icon={icons.save} title="Saved"/>) }} />

@@ -1,4 +1,5 @@
-import { Client, ID, Query, TablesDB } from 'react-native-appwrite';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Account, Client, ID, Query, Storage, TablesDB } from 'react-native-appwrite';
 
 export const client = new Client()
     .setEndpoint(process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT!)
@@ -6,6 +7,47 @@ export const client = new Client()
     .setPlatform(process.env.EXPO_PUBLIC_APPWRITE_PROJECT_NAME!);
 
 const databases = new TablesDB(client);
+const account = new Account(client);
+const storage = new Storage(client);
+
+const SESSION_KEY = "@appwrite_session_user";
+
+export async function register(email: string, password: string, name: string) {
+  const user = await account.create("unique()", email, password, name);
+  return user;
+}
+
+export async function login(email: string, password: string) {
+  await account.createEmailPasswordSession(email, password);
+  const user = await account.get();
+  if(user){
+    console.log(user);
+  }else{
+    console.log('no user');
+  }
+  await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(user));
+  return user;
+}
+
+export async function logout() {
+  try {
+    await account.deleteSession("current");
+  } finally {
+    await AsyncStorage.removeItem(SESSION_KEY);
+  }
+}
+
+export async function getCurrentUser() {
+  try {
+    const user = await account.get();
+    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    console.log("Usuário logado: ", user);
+    return user;
+  } catch (err) {
+    const raw = await AsyncStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }
+}
 
 export const updateSearchCount = async (query: string, movie: Movie) => {
 
@@ -54,5 +96,42 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> 
     }catch(err){
         console.error(err);
         return undefined;
+    }
+}
+
+export const getFavoriteMovies = async (userId: string): Promise<Movie[] | undefined> => {
+    try {
+        const result = await databases.listDocuments(
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
+            "favorite_movies",
+            [
+                Query.equal('user_id', userId)
+            ]
+        );
+
+        return result.documents as unknown as Movie[];
+    }catch(err){
+        console.error(err);
+        return undefined;
+    }
+}
+
+export const saveFavoriteMovies = async (userId: string, movie: MovieDetails) => {
+    console.log(userId);
+    try {
+        await databases.createRow(
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
+            "favorite_movies",
+            ID.unique(),
+            {
+                user_id: 1,
+                movie_id: movie.id,
+                poster_url: `http://image.tmdb.org/t/p/w500${movie.poster_path}`,
+                title: movie.title
+            }
+        );
+    }catch(err){
+        console.error(err);
+        throw err;
     }
 }

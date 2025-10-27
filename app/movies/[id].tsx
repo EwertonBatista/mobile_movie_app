@@ -1,8 +1,9 @@
 import { icons } from '@/constants/icons';
+import { saveFavoriteMovies } from '@/lib/appwrite';
 import { fetchMovieDetails } from '@/services/api';
 import useFetch from '@/services/useFetch';
 import { router, useLocalSearchParams } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 interface MovieInfoProps {
@@ -27,6 +28,13 @@ const MovieDetails = () => {
 
   const {data: movie, loading } = useFetch(() => fetchMovieDetails(id as string), true);
 
+  const [isSaved, setIsSaved] = useState(false);
+
+  const favoriteMovie = async () => {
+    setIsSaved(!isSaved);
+    saveFavoriteMovies(id as string, movie as MovieDetails);
+  }
+
   return (
     <View className='bg-primary flex-1'>
       <ScrollView contentContainerStyle={{paddingBottom: 80}}>
@@ -35,7 +43,13 @@ const MovieDetails = () => {
         </View>
 
         <View className='flex-col items-start justify-center mt-5 px-5'>
-          <Text className="text-white text-xl w-full font-bold">{movie?.title}</Text>
+          <View className='flex flex-row items-center justify-between w-full'>
+            <Text className="text-white text-xl font-bold">{movie?.title}</Text>
+            <TouchableOpacity onPress={favoriteMovie} className='text-black text-sm font-bold p-1 bg-accent flex flex-row rounded-md items-center'>
+              <Image source={icons.save} className='size-4' tintColor="#FFD700"/>
+              <Text className='ml-1 text-white'>{isSaved ? 'Saved' : 'Save'}</Text>
+            </TouchableOpacity>
+          </View>
           <View className='flex-row items-center justify-between gap-x-1 mt-2'>
             <Text className='text-lime-200 text-sm'>{movie?.release_date?.split('-')[0]}</Text>
             <Text className='text-lime-200 text-sm'>{movie?.runtime}m</Text>
