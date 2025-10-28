@@ -1,16 +1,36 @@
-import { Stack } from "expo-router";
-import { StatusBar } from "react-native";
-import { AuthContextProvider } from "../components/context/AuthContext";
-import './globals.css';
+import { Slot, useRouter } from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, StatusBar, View } from "react-native";
+import { AuthContextProvider, useAuth } from "../components/context/AuthContext";
+import "./globals.css";
 
 export default function RootLayout() {
-  return <>
+  return (
     <AuthContextProvider>
       <StatusBar backgroundColor="#0f0D23" barStyle="light-content" hidden={true} />
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="movies/[id]" options={{ headerShown: false }} />
-      </Stack>
+      <AuthGuard />
     </AuthContextProvider>
-  </>;
+  );
+}
+
+function AuthGuard() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) router.replace("/(auth)/login");
+      else router.replace("/(tabs)");
+    }
+  }, [user, loading]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-[#0f0D23] justify-center items-center">
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
+  }
+
+  return <Slot />;
 }

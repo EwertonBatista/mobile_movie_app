@@ -101,7 +101,7 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> 
 
 export const getFavoriteMovies = async (userId: string): Promise<Movie[] | undefined> => {
     try {
-        const result = await databases.listDocuments(
+        const result = await databases.listRows(
             process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
             "favorite_movies",
             [
@@ -109,7 +109,7 @@ export const getFavoriteMovies = async (userId: string): Promise<Movie[] | undef
             ]
         );
 
-        return result.documents as unknown as Movie[];
+        return result.rows as unknown as Movie[];
     }catch(err){
         console.error(err);
         return undefined;
