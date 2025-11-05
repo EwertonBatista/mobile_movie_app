@@ -17,6 +17,9 @@
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/logo.png"
       },
+      "navigationBar": {
+        "visible": false
+      },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.mobile_movie_app"

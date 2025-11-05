@@ -41,7 +41,6 @@ export async function getCurrentUser() {
   try {
     const user = await account.get();
     await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    console.log("Usuário logado: ", user);
     return user;
   } catch (err) {
     const raw = await AsyncStorage.getItem(SESSION_KEY);
@@ -99,17 +98,18 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> 
     }
 }
 
-export const getFavoriteMovies = async (userId: string): Promise<Movie[] | undefined> => {
+export const getFavoriteMovies = async (userId: string, movieId?: string|number): Promise<FavoriteMovie[] | undefined> => {
     try {
         const result = await databases.listRows(
             process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
             "favorite_movies",
             [
-                Query.equal('user_id', userId)
+                Query.equal('user_id', userId),
+                movieId ? Query.equal('movie_id', movieId) : Query.isNotNull('movie_id')
             ]
         );
 
-        return result.rows as unknown as Movie[];
+        return result.rows as unknown as FavoriteMovie[];
     }catch(err){
         console.error(err);
         return undefined;
@@ -117,20 +117,47 @@ export const getFavoriteMovies = async (userId: string): Promise<Movie[] | undef
 }
 
 export const saveFavoriteMovies = async (userId: string, movie: MovieDetails) => {
-    console.log(userId);
     try {
         await databases.createRow(
             process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
             "favorite_movies",
             ID.unique(),
             {
-                user_id: 1,
+                user_id: userId,
                 movie_id: movie.id,
                 poster_url: `http://image.tmdb.org/t/p/w500${movie.poster_path}`,
                 title: movie.title
             }
         );
     }catch(err){
+        console.error(err);
+        throw err;
+    }
+}
+
+export const removeFavoriteMovies = async (userId: string, movieId: number) => {
+    try {
+        const result = await databases.listRows(
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
+            "favorite_movies",
+            [
+                Query.equal('user_id', userId),
+                Query.equal('movie_id', movieId)
+            ]
+        );
+        
+        if (result.rows.length > 0) {
+            await databases.deleteRow(
+                process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
+                "favorite_movies",
+                result.rows[0].$id 
+            );
+            return true;
+        } else {
+            console.log("Nenhum filme encontrado com o ID fornecido na lista de favoritos do usuário.");
+            return false;
+        }
+    } catch(err) {
         console.error(err);
         throw err;
     }

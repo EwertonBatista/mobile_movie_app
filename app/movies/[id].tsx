@@ -1,10 +1,11 @@
+import { useAuth } from '@/components/context/AuthContext';
 import { icons } from '@/constants/icons';
-import { saveFavoriteMovies } from '@/lib/appwrite';
+import { getFavoriteMovies, removeFavoriteMovies, saveFavoriteMovies } from '@/lib/appwrite';
 import { fetchMovieDetails } from '@/services/api';
 import useFetch from '@/services/useFetch';
-import { router, useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 interface MovieInfoProps {
   label: string;
@@ -25,14 +26,45 @@ const MovieInfo = ({ label, value}: MovieInfoProps) => (
 const MovieDetails = () => {
 
   const { id } = useLocalSearchParams();
+  const { user } = useAuth();
 
   const {data: movie, loading } = useFetch(() => fetchMovieDetails(id as string), true);
+  
+  // Pegar informação se o filme esta favoritado pelo usuário
 
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(false); 
+  const [loadingSaved, setLoadingSaved] = useState(true);
 
-  const favoriteMovie = async () => {
-    setIsSaved(!isSaved);
-    saveFavoriteMovies(id as string, movie as MovieDetails);
+  useFocusEffect(
+    useCallback(() => {
+      const checkIfSaved = async () => {
+        if (!movie?.id) {
+          setLoadingSaved(true);
+          return;
+        }
+
+        setLoadingSaved(true);
+        try {
+          const response = await getFavoriteMovies(user?.$id as string, movie.id);
+          setIsSaved(response.length > 0);
+        } catch (error) {
+          console.error('Erro ao verificar favorito:', error);
+        } finally {
+          setLoadingSaved(false);
+        }
+      }
+  
+      checkIfSaved();
+    }, [movie?.id, user?.$id]) // ✅ Adicione user?.$id também
+  );
+
+  const handleFavoriteButton = async () => {
+    if(isSaved){
+      await removeFavoriteMovies(user?.$id as string, movie?.id as number);
+    }else{
+      await saveFavoriteMovies(user?.$id as string, movie as MovieDetails);
+    }
+      setIsSaved(!isSaved);
   }
 
   return (
@@ -45,9 +77,19 @@ const MovieDetails = () => {
         <View className='flex-col items-start justify-center mt-5 px-5'>
           <View className='flex flex-row items-center justify-between w-full'>
             <Text className="text-white text-xl font-bold">{movie?.title}</Text>
-            <TouchableOpacity onPress={favoriteMovie} className='text-black text-sm font-bold p-1 bg-accent flex flex-row rounded-md items-center'>
-              <Image source={icons.save} className='size-4' tintColor="#FFD700"/>
-              <Text className='ml-1 text-white'>{isSaved ? 'Saved' : 'Save'}</Text>
+            <TouchableOpacity 
+              onPress={handleFavoriteButton} 
+              disabled={loadingSaved}
+              className='text-black text-sm font-bold p-1 bg-accent flex flex-row rounded-md items-center'
+            >
+              {loadingSaved ? (
+                <ActivityIndicator size="small" color="#FFD700" />
+              ) : (
+                <>
+                  <Image source={icons.save} className='size-4' tintColor="#FFD700"/>
+                  <Text className='ml-1 text-white'>{isSaved ? 'Saved' : 'Save'}</Text>
+                </>
+              )}
             </TouchableOpacity>
           </View>
           <View className='flex-row items-center justify-between gap-x-1 mt-2'>

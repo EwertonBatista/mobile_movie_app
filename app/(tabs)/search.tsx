@@ -43,7 +43,8 @@ const Search = () => {
 
   return (
     <View className="flex-1 bg-primary">
-      <Image source={images.bg} className="flex-1 absolute w-full z-0" resizeMode='cover'/>
+      
+      <Image source={images.bg} className="absolute w-full z-0"/>
 
       <FlatList 
         data={movies} 
@@ -61,8 +62,8 @@ const Search = () => {
         }}
         ListHeaderComponent={
           <>
-            <View className='w-full flex-row justify-center mt-20 items-center'>
-              <Image source={icons.logo} className='w-12 h-10'/>
+            <View className='w-full flex-row justify-center items-center'>
+              <Image source={icons.logo} className="w-12 h-10 mt-20 mb-10 mx-auto"/>
             </View>
             <View className=''>
               <SearchBar value={searchQuery} onChangeText={(text: string) => setSearchQuery(text)} placeholder="Search for a movie"/>
@@ -92,6 +93,7 @@ const Search = () => {
           </View>
         }
       />
+
     </View>
   )
 }
