@@ -98,7 +98,7 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> 
     }
 }
 
-export const getFavoriteMovies = async (userId: string, movieId?: string|number): Promise<FavoriteMovie[] | undefined> => {
+export const getFavoriteMovies = async (userId: string, movieId?: string|number): Promise<MovieDetails[] | undefined> => {
     try {
         const result = await databases.listRows(
             process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
@@ -109,7 +109,7 @@ export const getFavoriteMovies = async (userId: string, movieId?: string|number)
             ]
         );
 
-        return result.rows as unknown as FavoriteMovie[];
+        return result.rows as unknown as MovieDetails[];
     }catch(err){
         console.error(err);
         return undefined;
@@ -125,8 +125,10 @@ export const saveFavoriteMovies = async (userId: string, movie: MovieDetails) =>
             {
                 user_id: userId,
                 movie_id: movie.id,
-                poster_url: `http://image.tmdb.org/t/p/w500${movie.poster_path}`,
-                title: movie.title
+                poster_path: `http://image.tmdb.org/t/p/w500${movie.poster_path}`,
+                title: movie.title,
+                release_date: movie.release_date,
+                vote_average: movie.vote_average
             }
         );
     }catch(err){
