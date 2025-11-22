@@ -46,7 +46,7 @@ useFocusEffect(
                   marginBottom: 10
                 }}
               renderItem={({ item }) => (                
-                <MovieCard {...item} id={item.movie_id}/>
+                <MovieCard {...item} id={item.movie_id} poster_path={item.poster_url}/>
               )}
             />
           </View>

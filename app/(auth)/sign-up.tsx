@@ -4,24 +4,25 @@ import { Link } from 'expo-router'
 import React from 'react'
 import { Alert, Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
-const Login = () => {
-  const { login } = useAuth();
+const SignUp = () => {
+  const { register } = useAuth();
+  const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const makeLogin = async () => {
-    if (!email || !password) {
+  const makeRegister = async () => {
+    if (!name || !email || !password) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await login(email, password);
-      // No need to push router, AuthGuard will handle it
+      await register(email, password, name);
+      // AuthGuard will handle redirect
     } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Falha ao fazer login');
+      Alert.alert('Erro', error.message || 'Falha ao criar conta');
     } finally {
       setIsSubmitting(false);
     }
@@ -31,7 +32,18 @@ const Login = () => {
     <View className='bg-primary flex-1 px-10'>
       <View className='flex justify-center items-center flex-1 flex-col gap-5'>
         <Image source={icons.person} className='size-10'/>
-        <Text className='text-white font-bold text-2xl'>Login</Text>
+        <Text className='text-white font-bold text-2xl'>Criar Conta</Text>
+        
+        <View className='flex flex-col gap-2 mt-5 w-full items-center'>
+          <Text className='text-light-200 w-1/2'>Nome</Text>
+          <TextInput
+            className='bg-dark-100 rounded-md p-2 w-1/2 text-white'
+            placeholderTextColor='#A8B5DB'
+            placeholder='Digite seu nome'
+            onChangeText={setName}
+          />
+        </View>
+
         <View className='flex flex-col gap-2 mt-5 w-full items-center'>
           <Text className='text-light-200 w-1/2'>Email</Text>
           <TextInput
@@ -43,6 +55,7 @@ const Login = () => {
             keyboardType="email-address"
           />
         </View>
+
         <View className='flex flex-col gap-2 mt-5 w-full items-center'>
           <Text className='text-light-200 w-1/2'>Senha</Text>
           <TextInput
@@ -53,20 +66,21 @@ const Login = () => {
             onChangeText={setPassword}
           />
         </View>
+
         <TouchableOpacity 
-          onPress={makeLogin} 
+          onPress={makeRegister} 
           className='bg-accent rounded-md p-2 mt-5 w-1/2 items-center'
           disabled={isSubmitting}
         >
           <Text className='text-white text-sm font-bold'>
-            {isSubmitting ? 'Entrando...' : 'Entrar'}
+            {isSubmitting ? 'Criando...' : 'Cadastrar'}
           </Text>
         </TouchableOpacity>
 
         <View className="flex-row gap-2 mt-5">
-            <Text className="text-light-200">Não tem uma conta?</Text>
-            <Link href="/(auth)/sign-up" className="text-accent font-bold">
-                Cadastre-se
+            <Text className="text-light-200">Já tem uma conta?</Text>
+            <Link href="/(auth)/login" className="text-accent font-bold">
+                Faça Login
             </Link>
         </View>
       </View>
@@ -74,4 +88,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default SignUp

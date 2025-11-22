@@ -13,58 +13,65 @@ const storage = new Storage(client);
 const SESSION_KEY = "@appwrite_session_user";
 
 export async function register(email: string, password: string, name: string) {
-  const user = await account.create("unique()", email, password, name);
-  return user;
+    const user = await account.create("unique()", email, password, name);
+    return user;
 }
 
 export async function login(email: string, password: string) {
-  await account.createEmailPasswordSession(email, password);
-  const user = await account.get();
-  if(user){
-    console.log(user);
-  }else{
-    console.log('no user');
-  }
-  await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(user));
-  return user;
+    await account.createEmailPasswordSession(email, password);
+    const user = await account.get();
+    if (user) {
+        console.log(user);
+    } else {
+        console.log('no user');
+    }
+    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    return user;
 }
 
 export async function logout() {
-  try {
-    await account.deleteSession("current");
-  } finally {
-    await AsyncStorage.removeItem(SESSION_KEY);
-  }
+    try {
+        await account.deleteSession("current");
+    } catch (error) {
+        console.error("Error deleting session:", error);
+    } finally {
+        await AsyncStorage.removeItem(SESSION_KEY);
+    }
 }
 
 export async function getCurrentUser() {
-  try {
-    const user = await account.get();
-    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    return user;
-  } catch (err) {
-    const raw = await AsyncStorage.getItem(SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
-  }
+    try {
+        const user = await account.get();
+        await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        return user;
+    } catch (err: any) {
+        if (err.code === 401) {
+            await AsyncStorage.removeItem(SESSION_KEY);
+            return null;
+        }
+
+        const raw = await AsyncStorage.getItem(SESSION_KEY);
+        return raw ? JSON.parse(raw) : null;
+    }
 }
 
 export const updateSearchCount = async (query: string, movie: Movie) => {
 
     try {
         const result = await databases.listRows(
-            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
-            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_TABLE_NAME!, 
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_TABLE_NAME!,
             [
                 Query.equal('searchTerm', query)
             ]
         );
 
-        if(result.rows.length > 0){
+        if (result.rows.length > 0) {
             const existingMovie = result.rows[0];
             await databases.updateRow(process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, process.env.EXPO_PUBLIC_APPWRITE_DATABASE_TABLE_NAME!, existingMovie.$id, {
                 count: existingMovie.count + 1
             });
-        }else{
+        } else {
             await databases.createRow(process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, process.env.EXPO_PUBLIC_APPWRITE_DATABASE_TABLE_NAME!, ID.unique(), {
                 searchTerm: query,
                 movie_id: movie.id,
@@ -74,7 +81,7 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
             });
 
         }
-    }catch(err){
+    } catch (err) {
         console.error(err);
         throw err;
     }
@@ -83,8 +90,8 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
 export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> => {
     try {
         const result = await databases.listRows(
-            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
-            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_TABLE_NAME!, 
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_TABLE_NAME!,
             [
                 Query.limit(5),
                 Query.orderDesc('count')
@@ -92,16 +99,16 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> 
         );
 
         return result.rows as unknown as TrendingMovie[];
-    }catch(err){
+    } catch (err) {
         console.error(err);
         return undefined;
     }
 }
 
-export const getFavoriteMovies = async (userId: string, movieId?: string|number): Promise<MovieDetails[] | undefined> => {
+export const getFavoriteMovies = async (userId: string, movieId?: string | number): Promise<MovieDetails[] | undefined> => {
     try {
         const result = await databases.listRows(
-            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
             "favorite_movies",
             [
                 Query.equal('user_id', userId),
@@ -110,28 +117,29 @@ export const getFavoriteMovies = async (userId: string, movieId?: string|number)
         );
 
         return result.rows as unknown as MovieDetails[];
-    }catch(err){
+    } catch (err) {
         console.error(err);
         return undefined;
     }
 }
 
 export const saveFavoriteMovies = async (userId: string, movie: MovieDetails) => {
+    console.log("Detalhes do filme", movie);
     try {
         await databases.createRow(
-            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
             "favorite_movies",
             ID.unique(),
             {
                 user_id: userId,
                 movie_id: movie.id,
-                poster_path: `http://image.tmdb.org/t/p/w500${movie.poster_path}`,
+                poster_url: `http://image.tmdb.org/t/p/w500${movie.poster_path}`,
                 title: movie.title,
                 release_date: movie.release_date,
-                vote_average: movie.vote_average
+                vote_average: String(movie.vote_average)
             }
         );
-    }catch(err){
+    } catch (err) {
         console.error(err);
         throw err;
     }
@@ -140,26 +148,26 @@ export const saveFavoriteMovies = async (userId: string, movie: MovieDetails) =>
 export const removeFavoriteMovies = async (userId: string, movieId: number) => {
     try {
         const result = await databases.listRows(
-            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
+            process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
             "favorite_movies",
             [
                 Query.equal('user_id', userId),
                 Query.equal('movie_id', movieId)
             ]
         );
-        
+
         if (result.rows.length > 0) {
             await databases.deleteRow(
-                process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!, 
+                process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
                 "favorite_movies",
-                result.rows[0].$id 
+                result.rows[0].$id
             );
             return true;
         } else {
             console.log("Nenhum filme encontrado com o ID fornecido na lista de favoritos do usuário.");
             return false;
         }
-    } catch(err) {
+    } catch (err) {
         console.error(err);
         throw err;
     }

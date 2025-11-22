@@ -1,14 +1,14 @@
+import { useAuth } from '@/components/context/AuthContext'
 import { icons } from '@/constants/icons'
-import { logout } from '@/lib/appwrite'
-import { router } from 'expo-router'
 import React from 'react'
 import { Image, Text, TouchableOpacity, View } from 'react-native'
 
 const Profile = () => {
+  const { logout } = useAuth();
 
   const makeLogout = async () => {
     await logout();
-    router.push('/(auth)/login');
+    // AuthGuard will handle redirect
   }
 
   return (

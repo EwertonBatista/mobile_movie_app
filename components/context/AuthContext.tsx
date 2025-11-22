@@ -30,7 +30,12 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
     const registerFunc = async (email: string, password: string, name: string) => {
         const u = await register(email, password, name);
-        // opcional: auto-login após registro (chamar login)
+        if (u) {
+            // Auto-login after registration
+            const sessionUser = await login(email, password);
+            setUser(sessionUser as any);
+            return sessionUser;
+        }
         return u;
     };
 
