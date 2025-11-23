@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Account, Avatars, Client, ID, Query, Storage, TablesDB } from 'react-native-appwrite';
 
+
+
 export const client = new Client()
     .setEndpoint(process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!)
@@ -172,5 +174,36 @@ export const removeFavoriteMovies = async (userId: string, movieId: number) => {
     } catch (err) {
         console.error(err);
         throw err;
+    }
+}
+
+export const uploadFile = async (file: { uri: string; name: string; type: string; size: number }) => {
+    if (!file) return;
+
+    if (!file) return;
+
+    try {
+        const uploadedFile = await storage.createFile(
+            process.env.EXPO_PUBLIC_APPWRITE_STORAGE_ID!,
+            ID.unique(),
+            file
+        );
+
+        const fileUrl = `${process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.EXPO_PUBLIC_APPWRITE_STORAGE_ID}/files/${uploadedFile.$id}/view?project=${process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID}`;
+
+        return fileUrl;
+    } catch (error) {
+        console.error("Error uploading file:", error);
+        throw error;
+    }
+}
+
+export const updateUserAvatar = async (avatarUrl: string) => {
+    try {
+        await account.updatePrefs({ avatar: avatarUrl });
+        return true;
+    } catch (error) {
+        console.error("Error updating user avatar:", error);
+        throw error;
     }
 }

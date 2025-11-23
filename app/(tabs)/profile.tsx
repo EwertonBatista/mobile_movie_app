@@ -1,14 +1,15 @@
 import { useAuth } from '@/components/context/AuthContext';
 import MovieCard from '@/components/MovieCard';
-import { avatars, getFavoriteMovies } from '@/lib/appwrite';
+import { avatars, getFavoriteMovies, updateUserAvatar, uploadFile } from '@/lib/appwrite';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import { FlatList, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Profile = () => {
-  const { logout, user } = useAuth();
+  const { logout, user, refetchUser } = useAuth();
   const [savedMoviesCount, setSavedMoviesCount] = useState(0);
   const [recentMovies, setRecentMovies] = useState<any[]>([]);
 
@@ -30,6 +31,37 @@ const Profile = () => {
     await logout();
   }
 
+  const handleImagePicker = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+    });
+
+    if (!result.canceled) {
+        try {
+            const file = {
+                uri: result.assets[0].uri,
+                name: `avatar_${user?.$id}.jpg`,
+                type: 'image/jpeg',
+                size: result.assets[0].fileSize || 0,
+            };
+
+            const fileUrl = await uploadFile(file);
+            
+            if (fileUrl) {
+                await updateUserAvatar(fileUrl.toString());
+                await refetchUser();
+                alert('Profile picture updated!');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to upload image');
+        }
+    }
+  };
+
   return (
     <SafeAreaView className='bg-primary flex-1'>
       <ScrollView className='flex-1' contentContainerStyle={{ paddingHorizontal: 24, marginTop: 40, paddingBottom: 40 }}>
@@ -40,12 +72,20 @@ const Profile = () => {
 
         {/* User Info */}
         <View className='items-center mb-10'>
-          <View className='w-24 h-24 rounded-full border-2 border-accent overflow-hidden mb-4'>
-            <Image 
-                source={{ uri: avatars.getInitials(user?.name).toString() }} 
-                className='w-full h-full'
-                resizeMode='cover'
-            />
+          <View className='relative'>
+            <TouchableOpacity 
+                  onPress={handleImagePicker}
+                  className='absolute bottom-6 -right-6 bg-accent p-1 rounded-full'
+              >
+                  <Ionicons name="camera" size={16} color="white" />
+              </TouchableOpacity>
+            <View className='w-24 h-24 rounded-full border-2 border-accent overflow-hidden mb-4 relative'>
+              <Image 
+                  source={{ uri: user?.prefs?.avatar || avatars.getInitials(user?.name).toString() }} 
+                  className='w-full h-full'
+                  resizeMode='cover'
+              />
+            </View>
           </View>
           <Text className='text-white font-bold text-xl mb-1'>{user?.name}</Text>
           <Text className='text-gray-400 text-sm'>{user?.email}</Text>

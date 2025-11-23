@@ -44,8 +44,13 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         setUser(null);
     };
 
+    const refetchUser = async () => {
+        const u = await getCurrentUser();
+        setUser(u);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, setUser, loading, setLoading, login: loginFunc, register: registerFunc, logout: logoutFunc }}>
+        <AuthContext.Provider value={{ user, setUser, loading, setLoading, login: loginFunc, register: registerFunc, logout: logoutFunc, refetchUser }}>
             {children}
         </AuthContext.Provider>
     );
