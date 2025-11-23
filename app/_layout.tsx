@@ -12,7 +12,7 @@ export default function RootLayout() {
     }, []);
   return (
     <AuthContextProvider>
-      <StatusBar backgroundColor="#0f0D23" barStyle="light-content" hidden={true} />
+      <StatusBar backgroundColor="#0f0D23" barStyle="light-content" hidden={false} />
       <AuthGuard />
     </AuthContextProvider>
   );

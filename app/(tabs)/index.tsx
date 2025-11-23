@@ -7,7 +7,7 @@ import { getTrendingMovies } from "@/lib/appwrite";
 import { fetchMovies } from "@/services/api";
 import useFetch from "@/services/useFetch";
 import { useRouter } from "expo-router";
-import { ActivityIndicator, Button, FlatList, Image, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, ScrollView, Text, View } from "react-native";
 export default function Index() {
 
   const router = useRouter();
@@ -42,8 +42,6 @@ export default function Index() {
               onPress={() => router.push('/search')}
               placeholder="Search for a movie"
             />
-
-            <Button onPress={() => console.log(movies)} title="Log movies"/>
 
             {trendingMovies && (              
               <View className="mt-10">

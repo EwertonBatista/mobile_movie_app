@@ -1,14 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Account, Client, ID, Query, Storage, TablesDB } from 'react-native-appwrite';
+import { Account, Avatars, Client, ID, Query, Storage, TablesDB } from 'react-native-appwrite';
 
 export const client = new Client()
     .setEndpoint(process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!)
     .setPlatform(process.env.EXPO_PUBLIC_APPWRITE_PROJECT_NAME!);
 
-const databases = new TablesDB(client);
-const account = new Account(client);
-const storage = new Storage(client);
+export const databases = new TablesDB(client);
+export const account = new Account(client);
+export const storage = new Storage(client);
+export const avatars = new Avatars(client);
 
 const SESSION_KEY = "@appwrite_session_user";
 
@@ -112,7 +113,8 @@ export const getFavoriteMovies = async (userId: string, movieId?: string | numbe
             "favorite_movies",
             [
                 Query.equal('user_id', userId),
-                movieId ? Query.equal('movie_id', movieId) : Query.isNotNull('movie_id')
+                movieId ? Query.equal('movie_id', movieId) : Query.isNotNull('movie_id'),
+                Query.orderDesc('$createdAt')
             ]
         );
 
