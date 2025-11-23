@@ -5,11 +5,36 @@ import { ActivityIndicator, StatusBar, View } from "react-native";
 import { AuthContextProvider, useAuth } from "../components/context/AuthContext";
 import "./globals.css";
 
+import { Ionicons } from '@expo/vector-icons';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
+    const [loaded, error] = useFonts({
+        ...Ionicons.font,
+    });
+
+    useEffect(() => {
+      if (error) throw error;
+    }, [error]);
+
+    useEffect(() => {
+      if (loaded) {
+        SplashScreen.hideAsync();
+      }
+    }, [loaded]);
+
     useEffect(() => {
       NavigationBar.setVisibilityAsync("hidden");
       NavigationBar.setBehaviorAsync('overlay-swipe');
     }, []);
+
+    if (!loaded) {
+      return null;
+    }
+
   return (
     <AuthContextProvider>
       <StatusBar backgroundColor="#0f0D23" barStyle="light-content" hidden={false} />

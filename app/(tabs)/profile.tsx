@@ -73,12 +73,6 @@ const Profile = () => {
         {/* User Info */}
         <View className='items-center mb-10'>
           <View className='relative'>
-            <TouchableOpacity 
-                  onPress={handleImagePicker}
-                  className='absolute bottom-6 -right-6 bg-accent p-1 rounded-full'
-              >
-                  <Ionicons name="camera" size={16} color="white" />
-              </TouchableOpacity>
             <View className='w-24 h-24 rounded-full border-2 border-accent overflow-hidden mb-4 relative'>
               <Image 
                   source={{ uri: user?.prefs?.avatar || avatars.getInitials(user?.name).toString() }} 
@@ -86,6 +80,12 @@ const Profile = () => {
                   resizeMode='cover'
               />
             </View>
+            <TouchableOpacity 
+                  onPress={handleImagePicker}
+                  className='absolute bottom-6 -right-6 bg-accent p-1 rounded-full z-10'
+              >
+                  <Ionicons name="camera" size={16} color="white" />
+              </TouchableOpacity>
           </View>
           <Text className='text-white font-bold text-xl mb-1'>{user?.name}</Text>
           <Text className='text-gray-400 text-sm'>{user?.email}</Text>
